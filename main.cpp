@@ -4,12 +4,19 @@
 #include <vector>
 using namespace std;
 
+/*
+  Name: Helen Wang
+  Date: Mar 3, 2023
+  Program: Heap, insert and store numbers into a max heap by user or file.
+  Can delete the largest element or all at once. 
+ */
+
 void insert(int* heap, int num);
 void printTree(int* heap, int depth, int index);
 void printList(int* heap);
 void deleteAll(int* heap);
-void deleteRoot(int* heap, int n);
-//void deleteRoot(int* heap, int &size);
+void deleteRoot(int* heap, int index);
+
 
 int main() {
 
@@ -17,16 +24,13 @@ int main() {
   char command[15];
   int* heap = new int[101];
   int size = 0;
-  //int count = 1;
-  //int n = sizeof(heap) / sizeof(heap[0]);
 
+  //clear out array
   for(int i = 1; i < 101; i++) {
     heap[i] = 0;
   }
   
   while (playing == true) {
-
-    cout << endl;
     //User chooses to insert, remove, print or quit
     cout << "commands: insert, remove, print or quit" << endl;
     cin.get(command, 15, '\n');
@@ -75,40 +79,26 @@ int main() {
       cin.ignore();
 
       if (strcmp(command, "all") == false) {
-	/*
-	while(heap[1]!=0){
-	  //for(int i = 1; i < 101; i++) {
-	  //if (heap[i] != 0) {
-	  deleteRoot(heap, 1);	  
-	  cout << "delete once" << endl;
-	  cout << "heap[1] = " << heap[1] << endl;
-	}	*/
-	while(heap[1] != 0) {
-	  for (int i = 1; i < 101; i++) {
-	    deleteRoot(heap, i);
-	  }
+	int index = 1;
+	//while heap is not empty yet, keep deleting the largest element
+	while(heap[index] != 0) {
+       	  deleteRoot(heap, index);
 	}
       }
 
       else if (strcmp(command, "largest") == false) {
-	//int n = sizeof(heap) / sizeof(heap[0]);
 	deleteRoot(heap, 1);
-	//	deleteRoot(heap, size);
       }
-
     }
 
     else if (strcmp(command, "print") == false) {
       int inputNum = 1;
-    
-      // printTree(heap, 1, 0);
+      cout << "list format: " << endl;
       printList(heap);
-      //    cout << endl;
-      cout << endl;
-      cout << "tree format: " << endl;
       cout << endl;
 
-      //      printTree(heap, 0, 1);
+      cout << "tree format: " << endl;
+      cout << endl;
       printTree(heap, 0, 1);
     }
 
@@ -122,14 +112,18 @@ int main() {
   }
 }
 
+//insert a number into the heap
 void insert(int* heap, int num) {
   int count = 1;
   int temp = 0;
-  
+
+  //if array is empty, insert number into first slot
   if (heap[1] == 0) {
     heap[1] = num;
     //cout << "helen"<<endl;
   }
+  
+  //else, swap with parent if bigger
   else {
     //cout << "hi" << endl;
     while(heap[count] != 0) {
@@ -137,7 +131,6 @@ void insert(int* heap, int num) {
     }
     heap[count] = num;
     cout << heap[count] << " ";
-  
   
     while(heap[count] > heap[count/2]&& count!=1) {
       temp = heap[count/2];
@@ -149,6 +142,7 @@ void insert(int* heap, int num) {
   }
 }
 
+//print numbers as a list 
 void printList(int* heap) {
   for(int i = 1; i < 101; i++) {
     if (heap[i] != 0) {
@@ -157,66 +151,85 @@ void printList(int* heap) {
   }
 }
 
+//print numbers in a tree format
 void printTree(int* heap, int depth, int index) {
-  
-  if(heap[1] == 0) {
-    index++;
+
+  //parent to the left, children to the right of parents
+  if (heap[1] != 0) {
+    if(heap[1] == 0) {
+      index++;
     }
-  
-  if(heap[index * 2 + 1] != 0) {
-    printTree(heap, depth + 1, index*2+1);
+    
+    if(heap[index * 2 + 1] != 0) {
+      printTree(heap, depth + 1, index*2+1);
+    }
+    
+    for (int i = 0; i < depth; i++) {
+      cout << "\t";
+    }
+    
+    cout << heap[index] << endl;
+    
+    if (heap[index * 2] != 0) {
+      printTree(heap, depth + 1, index*2);
+    }
   }
-
-  for (int i = 0; i < depth; i++) {
-    cout << "\t";
-  }
-
-  cout << heap[index] << endl;
-
-  if (heap[index * 2] != 0) {
-    printTree(heap, depth + 1, index*2);
-  }  
 }
 
-
+//delete the largest element of the array
 void deleteRoot(int* heap, int index) {
-  cout << "root: " << heap[1] << endl;
+  //cout << "root: " << heap[1] << endl;
 
-  index = 1;
-  
+    int size = 1;
+    cout << "beginning index: " << index << endl;
   //Get last value
-  while(heap[index] !=0 || (index != 1)) {
-    index++;
-    cout << "get root" << endl;
+  while(heap[size] !=0) {
+    size++;
   }
 
-  //temp = heap[index];
-  heap[1] = heap[index];
-  heap[index] = 0;
+  size = size-1;
+
+  int bigger = 0;
+  int r = index;
   
-  while((heap[index] < heap[index * 2]) || (heap[index] < heap[index * 2 + 1])) {
+  heap[index] = heap[size];
+  heap[size] = 0;
+
+  //move last value to root
+  
+  //cout << "before while loop" << endl;
+  //cout << "index: " << index << endl;
+  //cout << "heap[index]: " << heap[index] << endl;
+  //cout << "left: " << heap[index*2] << endl;
+  //cout << "right: " << heap[index*2+1] << endl;
+  
+  while((heap[r] < heap[r * 2]) || (heap[r] < heap[r * 2 + 1])) {
     //swap current with larger of left/right
     //current is now the one you swapped with
 
     //if left is bigger than right, replace root with left
-    if (heap[index * 2] > heap[index * 2 +1]) {
+    if (heap[r * 2] > heap[r * 2 +1]) {
       //heap[1] = heap[index * 2];
       //heap[index] = heap[index*2];
-      int temp = heap[1];
-      heap[1] = heap[index*2];
-      heap[index*2] = temp;
+      int temp = heap[r];
+      heap[r] = heap[r*2];
+      heap[r*2] = temp;
       cout << "left" << endl;
+      r = r*2;
     }
 
     //if right is bigger than left, replace root with right
-    else if (heap[index * 2 +1] > heap[index *2]) {
+    else if (heap[r * 2 +1] > heap[r *2]) {
       //heap[1] = heap[index * 2 +1];
       //heap[index] = heap[index*2+1];
-      int temp = heap[1];
-      heap[1] = heap[index*2+1];
-      heap[index*2+1] = temp;
+      int temp1 = heap[r];
+      heap[r] = heap[r*2+1];
+      heap[r*2+1] = temp1;
       cout << "right" << endl;
+      r = r*2+1;
     }
+    cout << "hi"<< endl;
+    cout << "index: " << index << endl;
   }
 
   printList(heap);
